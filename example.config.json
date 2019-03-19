@@ -10,9 +10,12 @@
 		{
 			"accessory": "MiRobotVacuum",
 			"name": "Vacuum Cleaner",
+			"model": "roborock.vacuum.s5",
 			"ip": "192.168.1.202",
 			"token": "6f7a65786550386b755a6b526666744d",
-			"pause": false
+			"pause": false,
+			"dock": false,
+			"care": false
 		}
 	]
 }

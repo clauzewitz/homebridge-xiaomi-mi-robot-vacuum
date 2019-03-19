@@ -1,11 +1,77 @@
 const miio = require('miio');
-let Service, Characteristic;
+const util = require('util');
+let Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
+	UUIDGen = homebridge.hap.uuid;
 
 	homebridge.registerAccessory('homebridge-xiaomi-mi-robot-vacuum', 'MiRobotVacuum', MiRobotVacuum);
+}
+
+function initCustomService() {
+	const baseProp = {
+		format: Characteristic.Formats.FLOAT,
+		unit: '%',
+		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+	};
+
+	let careSensorsUUID = UUIDGen.generate('Care Indicator sensors');
+	Characteristic.CareSensors = function () {
+		Characteristic.call(this, 'Care Indicator sensors', careSensorsUUID);
+		
+		this.setProp(baseProp);
+
+		this.value = this.getDefaultValue();
+	};
+	util.inherits(Characteristic.CareSensors, Characteristic);
+	Characteristic.CareSensors.UUID = careSensorsUUID;
+
+	let careFilterUUID = UUIDGen.generate('Care Indicator filter');
+	Characteristic.CareFilter = function () {
+		Characteristic.call(this, 'Care Indicator filter', careFilterUUID);
+		
+		this.setProp(baseProp);
+
+		this.value = this.getDefaultValue();
+	};
+	util.inherits(Characteristic.CareFilter, Characteristic);
+	Characteristic.CareFilter.UUID = careFilterUUID;
+
+	let careSideBrushUUID = UUIDGen.generate('Care Indicator side brush');
+	Characteristic.CareSideBrush = function () {
+		Characteristic.call(this, 'Care Indicator side brush', careSideBrushUUID);
+		
+		this.setProp(baseProp);
+
+		this.value = this.getDefaultValue();
+	};
+	util.inherits(Characteristic.CareSideBrush, Characteristic);
+	Characteristic.CareSideBrush.UUID = careSideBrushUUID;
+
+	let careMainBrushUUID = UUIDGen.generate('Care Indicator main brush');
+	Characteristic.CareMainBrush = function () {
+		Characteristic.call(this, 'Care Indicator main brush', careMainBrushUUID);
+		
+		this.setProp(baseProp);
+
+		this.value = this.getDefaultValue();
+	};
+	util.inherits(Characteristic.CareMainBrush, Characteristic);
+	Characteristic.CareMainBrush.UUID = careMainBrushUUID;
+
+	let careUUID = UUIDGen.generate('Care Service');
+	Service.Care = function (displayName, subType) {
+		Service.call(this, displayName, careUUID, subType);
+
+		this.addCharacteristic(Characteristic.CareSensors);
+		this.addCharacteristic(Characteristic.CareFilter);
+		this.addCharacteristic(Characteristic.CareSideBrush);
+		this.addCharacteristic(Characteristic.CareMainBrush);
+	}
+	util.inherits(Service.Care, Service);
+	Service.Care.UUID = careUUID;
 }
 
 function MiRobotVacuum(log, config) {
@@ -14,12 +80,16 @@ function MiRobotVacuum(log, config) {
 	this.name = config.name || 'Vacuum Cleaner';
 	this.ip = config.ip;
 	this.token = config.token;
+	this.model = config.model || 'roborock.vacuum.v1';
 	this.pause = config.pause;
+	this.dock = config.dock;
+	this.care = config.care;
 	this.device = null;
 	this.cleaningState = null;
 	this.fanSpeed = null;
 	this.chargingState = null;
 	this.batteryLevel = null;
+	this.dockState = null;
 
 	if (!this.ip) {
 		throw new Error('Your must provide IP address of the robot vacuum.');
@@ -28,6 +98,24 @@ function MiRobotVacuum(log, config) {
 	if (!this.token) {
 		throw new Error('Your must provide token of the robot vacuum.');
 	}
+
+	this.speedGroup = {
+		v1: [
+			0,	// Idle
+			38,	// Quiet
+			60,	// Balanced
+			77,	// Turbo
+			90	// Max Speed
+		],
+		s5: [
+			0,	// Idle
+			15, // Mopping
+			38,	// Quiet
+			60,	// Balanced
+			75,	// Turbo
+			100	// Max Speed
+		]
+	};
 
 	// Vacuum cleaner is not available in Homekit yet, register as Fan
 	this.fanService = new Service.Fan(this.name);
@@ -78,24 +166,56 @@ function MiRobotVacuum(log, config) {
 		this.services.push(this.pauseService);
 	}
 
+	if (this.dock) {
+		this.dockService = new Service.OccupancySensor(this.name + ' Dock');
+
+		this.dockService
+			.getCharacteristic(Characteristic.OccupancyDetected)
+			.on('get', this.getDockState.bind(this));
+
+		this.services.push(this.dockService);
+	}
+
+	if (this.care) {
+		initCustomService();
+
+		this.careService = new Service.Care(this.name + ' Care');
+
+		this.careService
+			.getCharacteristic(Characteristic.CareSensors)
+			.on('get', this.getCareSensorsState.bind(this));
+	
+		this.careService
+			.getCharacteristic(Characteristic.CareFilter)
+			.on('get', this.getCareFilterState.bind(this));
+	
+		this.careService
+			.getCharacteristic(Characteristic.CareSideBrush)
+			.on('get', this.getCareSideBrushState.bind(this));
+	
+		this.careService
+			.getCharacteristic(Characteristic.CareMainBrush)
+			.on('get', this.getCareMainBrushState.bind(this));
+	}
+
 	this.discover();
 }
 
 MiRobotVacuum.prototype = {
 	discover: function() {
-		var log = this.log;
-		var that = this;
+		const that = this;
+		let log = that.log;
 
 		miio.device({
-			address: this.ip,
-			token: this.token,
-			model: 'rockrobo.vacuum.v1'
+			address: that.ip,
+			token: that.token,
+			model: that.model
 		})
 		.then(device => {
 			if (device.matches('type:vaccuum')) {
 				that.device = device;
 
-				log.debug('Discovered Mi Robot Vacuum at %s', this.ip);
+				log.debug('Discovered Mi Robot Vacuum at %s', that.ip);
 
 				log.debug('Model         : ' + device.miioModel);
 				log.debug('State         : ' + device.property('state'));
@@ -155,11 +275,22 @@ MiRobotVacuum.prototype = {
 	updateCleaningState: function(state) {
 		this.log.debug('Cleaning State -> %s', state);
 		this.cleaningState = state;
+
+		if (this.dock) {
+			this.dockState = !state;
+			this.dockService.getCharacteristic().updateValue(state);
+		}
 	},
 
 	updateChargingState: function(state) {
 		this.log.debug('Charging State -> %s', state);
 		this.chargingState = state;
+		
+		if (this.dock) {
+			this.dockState = state;
+			this.dockService.getCharacteristic().updateValue(state);
+		}
+
 		this.batteryService.getCharacteristic(Characteristic.ChargingState).updateValue(state);
 	},
 
@@ -185,17 +316,17 @@ MiRobotVacuum.prototype = {
 	},
 
 	setPowerState: function(state, callback) {
-		if (!this.device) {
+		const that = this;
+
+		if (!that.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
 		}
 
-		var that = this;
-
 		if (state) {
-			this.device.activateCleaning();
+			that.device.activateCleaning();
 		} else {
-			this.device.call('app_stop', []);
+			that.device.call('app_stop', []);
 
 			setTimeout(function() {
 				that.device.call('app_charge', [], {
@@ -242,6 +373,14 @@ MiRobotVacuum.prototype = {
 		callback();
 	},
 	
+	getDockState: function(callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+		}
+
+		callback(null, this.dockState);
+	},
+
 	getRotationSpeed: function(callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
@@ -257,13 +396,11 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		var speeds = [
-			0,	// Idle
-			38,	// Quiet
-			60,	// Balanced
-			77,	// Turbo
-			90	// Max Speed
-		];
+		let speeds = this.speedGroup['v1'];
+
+		if (this.model == 'roborock.vacuum.s5') {
+			speeds = this.speedGroup['s5'];
+		}
 
 		for (var item in speeds) {
 			if (speed <= item) {
@@ -301,6 +438,50 @@ MiRobotVacuum.prototype = {
 		}
 
 		callback(null, (this.chargingState) ? Characteristic.ChargingState.CHARGING : Characteristic.ChargingState.NOT_CHARGEABLE);
+	},
+
+	getCareSensorsState: function(callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		var lifetimepercent = that.device.property("sensorDirtyTime") / 108000 * 100;
+
+		callback(null, lifetimepercent);
+	},
+
+	getCareFilterState: function(callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		var lifetimepercent = that.device.property("filterWorkTime") / 540000 * 100;
+
+		callback(null, lifetimepercent);
+	},
+
+	getCareSideBrushState: function(callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		var lifetimepercent = that.device.property("sideBrushWorkTime") / 720000 * 100;
+
+		callback(null, lifetimepercent);
+	},
+
+	getCareMainBrushState: function(callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		var lifetimepercent = that.device.property("mainBrushWorkTime") / 1080000 * 100;
+
+		callback(null, lifetimepercent);
 	},
 
 	identify: function(callback) {
