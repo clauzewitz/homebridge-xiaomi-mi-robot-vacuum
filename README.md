@@ -40,7 +40,7 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 1. Install required packages.
 
    ```
-   npm install -g homebridge-xiaomi-mi-robot-vacuum miio
+   npm install -g homebridge-xiaomi-robot-vacuum miio
    ```
 
 2. Remove Mi Robot Vaccum from your Mi Home app.
