@@ -126,7 +126,7 @@ function MiRobotVacuum(log, config) {
 	this.serviceInfo
 		.setCharacteristic(Characteristic.Manufacturer, 'Xiaomi')
 		.setCharacteristic(Characteristic.Model, 'Robot Vacuum Cleaner')
-		.setCharacteristic(Characteristic.SerialNumber, this.token);
+		.setCharacteristic(Characteristic.SerialNumber, this.token.toUpperCase());
 
 	this.services.push(this.serviceInfo);
 
