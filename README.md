@@ -4,7 +4,8 @@ This project is forked from [homebridge-xiaomi-mi-robot-vacuum](https://github.c
 
 This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarina/homebridge). Since Apple Homekit is not supporting vacuum cleaner device yet, this plugin will add the robot as **Fan** to your Home app.
 
-![roborock-vacuum-v1](https://cloud.githubusercontent.com/assets/73107/25977694/d630303c-36ef-11e7-8c6f-12b2266be855.jpg)
+![roborock-vacuum-v1](https://user-images.githubusercontent.com/12408302/54580338-02b61200-4a4b-11e9-9f02-f03827dd5918.jpg)
+![roborock-vacuum-s5](https://user-images.githubusercontent.com/12408302/54580352-106b9780-4a4b-11e9-98a4-92026f8712c4.jpg)
 
 
 
