@@ -410,7 +410,7 @@ MiRobotVacuum.prototype = {
 			}
 		}
 
-		this.device.changeFanSpeed(parseInt(speed));
+		this.device.changeFanSpeed(Number(speed));
 		callback(null, speed);
 	},
 
