@@ -128,8 +128,6 @@ function MiRobotVacuum(log, config) {
 		.setCharacteristic(Characteristic.Model, 'Robot Vacuum Cleaner')
 		.setCharacteristic(Characteristic.SerialNumber, this.token.toUpperCase());
 
-	this.services.push(this.serviceInfo);
-
 	this.fanService
 		.getCharacteristic(Characteristic.On)
 		.on('get', this.getPowerState.bind(this))
@@ -139,8 +137,6 @@ function MiRobotVacuum(log, config) {
 		.getCharacteristic(Characteristic.RotationSpeed)
 		.on('get', this.getRotationSpeed.bind(this))
 		.on('set', this.setRotationSpeed.bind(this));
-
-	this.services.push(this.fanService);
 
 	this.batteryService
 		.getCharacteristic(Characteristic.BatteryLevel)
@@ -154,7 +150,9 @@ function MiRobotVacuum(log, config) {
 		.getCharacteristic(Characteristic.StatusLowBattery)
 		.on('get', this.getStatusLowBattery.bind(this));
 
+	this.services.push(this.fanService);
 	this.services.push(this.batteryService);
+	this.services.push(this.serviceInfo);
 
 	if (this.pause) {
 		this.pauseService = new Service.Switch(this.name + ' Pause');
@@ -197,6 +195,8 @@ function MiRobotVacuum(log, config) {
 		this.statusService
 			.getCharacteristic(Characteristic.StatusMainBrush)
 			.on('get', this.getStatusMainBrush.bind(this));
+
+		this.services.push(this.statusService);
 	}
 
 	this.discover();
