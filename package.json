@@ -6,7 +6,9 @@
   "keywords": [
     "homebridge-plugin",
     "xiaomi",
-    "mi robot"
+    "mi robot",
+    "roborock",
+    "vacuum"
   ],
   "repository": {
     "type": "git",
