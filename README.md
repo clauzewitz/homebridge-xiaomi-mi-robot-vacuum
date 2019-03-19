@@ -1,4 +1,4 @@
-# homebridge-xiaomi-mi-robot-vacuum
+# homebridge-xiaomi-robot-vacuum
 
 This project is forked from [homebridge-xiaomi-mi-robot-vacuum](https://github.com/seikan/homebridge-xiaomi-mi-robot-vacuum).
 
