@@ -179,7 +179,7 @@ function MiRobotVacuum(log, config) {
 	if (this.status) {
 		initCustomService();
 
-		this.statusService = new Service.Status(this.name + ' Care');
+		this.statusService = new Service.Status(this.name + ' Status');
 
 		this.statusService
 			.getCharacteristic(Characteristic.StatusSensors)
