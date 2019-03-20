@@ -232,7 +232,7 @@ MiRobotVacuum.prototype = {
 						state = JSON.parse(JSON.stringify(state));
 
 						if (state.error !== undefined) {
-							console.log(state.error);
+							log.debug(state.error);
 							return;
 						}
 
@@ -263,7 +263,7 @@ MiRobotVacuum.prototype = {
 							}
 						});
 					})
-					.catch(err => console.log(err));
+					.catch(err => log.debug(err));
 			} else {
 				log.debug('Device discovered at %s is not Mi Robot Vacuum', that.ip);
 			}
@@ -361,7 +361,7 @@ MiRobotVacuum.prototype = {
 
 		if (state && this.device.property('state') == 'cleaning') {
 			this.device.pause()
-				.catch(err => console.log(err));
+				.catch(err => this.log.debug(err));
 			
 			callback(null, true);
 			return;
@@ -369,7 +369,7 @@ MiRobotVacuum.prototype = {
 		
 		if (!state && this.device.property('state') == 'paused') {
 			this.device.activateCleaning()
-				.catch(err => console.log(err));
+				.catch(err => this.log.debug(err));
 			
 			callback(null, false);
 			return;
