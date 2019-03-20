@@ -1,5 +1,5 @@
 const miio = require('miio');
-const util = require('util');
+const inherits = require('util').inherits;
 let Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
@@ -25,7 +25,7 @@ function initCustomService() {
 
 		this.value = this.getDefaultValue();
 	};
-	util.inherits(Characteristic.StatusSensors, Characteristic);
+	inherits(Characteristic.StatusSensors, Characteristic);
 	Characteristic.StatusSensors.UUID = statusSensorsUUID;
 
 	let statusFilterUUID = UUIDGen.generate('Filter status');
@@ -36,7 +36,7 @@ function initCustomService() {
 
 		this.value = this.getDefaultValue();
 	};
-	util.inherits(Characteristic.StatusFilter, Characteristic);
+	inherits(Characteristic.StatusFilter, Characteristic);
 	Characteristic.StatusFilter.UUID = statusFilterUUID;
 
 	let statusSideBrushUUID = UUIDGen.generate('Side brush status');
@@ -47,7 +47,7 @@ function initCustomService() {
 
 		this.value = this.getDefaultValue();
 	};
-	util.inherits(Characteristic.StatusSideBrush, Characteristic);
+	inherits(Characteristic.StatusSideBrush, Characteristic);
 	Characteristic.StatusSideBrush.UUID = statusSideBrushUUID;
 
 	let statusMainBrushUUID = UUIDGen.generate('Main brush status');
@@ -58,7 +58,7 @@ function initCustomService() {
 
 		this.value = this.getDefaultValue();
 	};
-	util.inherits(Characteristic.StatusMainBrush, Characteristic);
+	inherits(Characteristic.StatusMainBrush, Characteristic);
 	Characteristic.StatusMainBrush.UUID = statusMainBrushUUID;
 
 	let statusUUID = UUIDGen.generate('Status Service');
@@ -70,7 +70,7 @@ function initCustomService() {
 		this.addCharacteristic(Characteristic.StatusSideBrush);
 		this.addCharacteristic(Characteristic.StatusMainBrush);
 	}
-	util.inherits(Service.Status, Service);
+	inherits(Service.Status, Service);
 	Service.Status.UUID = statusUUID;
 }
 
