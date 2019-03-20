@@ -381,6 +381,7 @@ MiRobotVacuum.prototype = {
 	getDockState: function(callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
+			return;
 		}
 
 		callback(null, this.dockState);
