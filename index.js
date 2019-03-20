@@ -170,10 +170,10 @@ function MiRobotVacuum(log, config) {
 	}
 
 	if (this.dock) {
-		this.dockService = new Service.OccupancySensor(this.name + ' Dock');
+		this.dockService = new Service.MotionSensor(this.name + ' Dock');
 
 		this.dockService
-			.getCharacteristic(Characteristic.OccupancyDetected)
+			.getCharacteristic(Characteristic.MotionDetected)
 			.on('get', this.getDockState.bind(this));
 
 		this.services.push(this.dockService);
@@ -283,7 +283,7 @@ MiRobotVacuum.prototype = {
 
 		if (this.dock) {
 			this.dockState = !state;
-			this.dockService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(state);
+			this.dockService.getCharacteristic(Characteristic.MotionDetected).updateValue(state);
 		}
 	},
 
@@ -293,7 +293,7 @@ MiRobotVacuum.prototype = {
 		
 		if (this.dock) {
 			this.dockState = state;
-			this.dockService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(state);
+			this.dockService.getCharacteristic(Characteristic.MotionDetected).updateValue(state);
 		}
 
 		this.batteryService.getCharacteristic(Characteristic.ChargingState).updateValue(state);
