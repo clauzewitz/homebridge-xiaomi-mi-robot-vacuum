@@ -451,9 +451,7 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		var lifetimepercent = that.device.property("sensorDirtyTime") / 108000 * 100;
-
-		callback(null, lifetimepercent);
+		callback(null, (this.device.property("sensorDirtyTime") / 108000 * 100));
 	},
 
 	getStatusFilter: function(callback) {
@@ -462,9 +460,7 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		var lifetimepercent = that.device.property("filterWorkTime") / 540000 * 100;
-
-		callback(null, lifetimepercent);
+		callback(null, (this.device.property("filterWorkTime") / 540000 * 100));
 	},
 
 	getStatusSideBrush: function(callback) {
@@ -473,9 +469,7 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		var lifetimepercent = that.device.property("sideBrushWorkTime") / 720000 * 100;
-
-		callback(null, lifetimepercent);
+		callback(null, (this.device.property("sideBrushWorkTime") / 720000 * 100));
 	},
 
 	getStatusMainBrush: function(callback) {
@@ -484,9 +478,7 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		var lifetimepercent = that.device.property("mainBrushWorkTime") / 1080000 * 100;
-
-		callback(null, lifetimepercent);
+		callback(null, (this.device.property("mainBrushWorkTime") / 1080000 * 100));
 	},
 
 	identify: function(callback) {
