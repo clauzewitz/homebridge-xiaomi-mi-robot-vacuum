@@ -1,5 +1,8 @@
+'use strict';
+
 const miio = require('miio');
 const inherits = require('util').inherits;
+const version = require('./package.json').version;
 let Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
@@ -126,7 +129,8 @@ function MiRobotVacuum(log, config) {
 	this.serviceInfo
 		.setCharacteristic(Characteristic.Manufacturer, 'Xiaomi')
 		.setCharacteristic(Characteristic.Model, 'Robot Vacuum Cleaner')
-		.setCharacteristic(Characteristic.SerialNumber, this.token.toUpperCase());
+		.setCharacteristic(Characteristic.SerialNumber, this.token.toUpperCase())
+		.setCharacteristic(Characteristic.FirmwareRevision, version);
 
 	this.fanService
 		.getCharacteristic(Characteristic.On)
