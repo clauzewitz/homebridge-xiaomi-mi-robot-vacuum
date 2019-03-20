@@ -14,7 +14,7 @@ module.exports = function(homebridge) {
 }
 
 function initCustomService() {
-	const baseProp = {
+	const baseProps = {
 		format: Characteristic.Formats.FLOAT,
 		unit: '%',
 		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
@@ -24,7 +24,7 @@ function initCustomService() {
 	Characteristic.StatusSensors = function () {
 		Characteristic.call(this, 'Sensors status', statusSensorsUUID);
 		
-		this.setProps(baseProp);
+		this.setProps(baseProps);
 
 		this.value = this.getDefaultValue();
 	};
@@ -35,7 +35,7 @@ function initCustomService() {
 	Characteristic.StatusFilter = function () {
 		Characteristic.call(this, 'Filter status', statusFilterUUID);
 		
-		this.setProps(baseProp);
+		this.setProps(baseProps);
 
 		this.value = this.getDefaultValue();
 	};
@@ -46,7 +46,7 @@ function initCustomService() {
 	Characteristic.StatusSideBrush = function () {
 		Characteristic.call(this, 'Side brush status', statusSideBrushUUID);
 		
-		this.setProps(baseProp);
+		this.setProps(baseProps);
 
 		this.value = this.getDefaultValue();
 	};
@@ -57,7 +57,7 @@ function initCustomService() {
 	Characteristic.StatusMainBrush = function () {
 		Characteristic.call(this, 'Main brush status', statusMainBrushUUID);
 		
-		this.setProps(baseProp);
+		this.setProps(baseProps);
 
 		this.value = this.getDefaultValue();
 	};
