@@ -24,7 +24,7 @@ function initCustomService() {
 	Characteristic.StatusSensors = function () {
 		Characteristic.call(this, 'Sensors status', statusSensorsUUID);
 		
-		this.setProp(baseProp);
+		this.setProps(baseProp);
 
 		this.value = this.getDefaultValue();
 	};
@@ -35,7 +35,7 @@ function initCustomService() {
 	Characteristic.StatusFilter = function () {
 		Characteristic.call(this, 'Filter status', statusFilterUUID);
 		
-		this.setProp(baseProp);
+		this.setProps(baseProp);
 
 		this.value = this.getDefaultValue();
 	};
@@ -46,7 +46,7 @@ function initCustomService() {
 	Characteristic.StatusSideBrush = function () {
 		Characteristic.call(this, 'Side brush status', statusSideBrushUUID);
 		
-		this.setProp(baseProp);
+		this.setProps(baseProp);
 
 		this.value = this.getDefaultValue();
 	};
@@ -57,7 +57,7 @@ function initCustomService() {
 	Characteristic.StatusMainBrush = function () {
 		Characteristic.call(this, 'Main brush status', statusMainBrushUUID);
 		
-		this.setProp(baseProp);
+		this.setProps(baseProp);
 
 		this.value = this.getDefaultValue();
 	};
