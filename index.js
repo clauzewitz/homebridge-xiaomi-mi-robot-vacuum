@@ -283,7 +283,7 @@ MiRobotVacuum.prototype = {
 
 		if (this.dock) {
 			this.dockState = !state;
-			this.dockService.getCharacteristic().updateValue(state);
+			this.dockService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(state);
 		}
 	},
 
@@ -293,7 +293,7 @@ MiRobotVacuum.prototype = {
 		
 		if (this.dock) {
 			this.dockState = state;
-			this.dockService.getCharacteristic().updateValue(state);
+			this.dockService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(state);
 		}
 
 		this.batteryService.getCharacteristic(Characteristic.ChargingState).updateValue(state);
