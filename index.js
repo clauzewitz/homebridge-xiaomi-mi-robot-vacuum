@@ -155,15 +155,15 @@ function MiRobotVacuum(log, config) {
 		.getCharacteristic(Characteristic.StatusLowBattery)
 		.on('get', this.getStatusLowBattery.bind(this));
 
-	this.statusService
+	this.service
 		.getCharacteristic(Characteristic.FilterLifeLevel)
 		.on('get', this.getFilterState.bind(this));
 
-	this.statusService
+	this.service
 		.getCharacteristic(Characteristic.SideBrushLifeLevel)
 		.on('get', this.getSideBrushState.bind(this));
 
-	this.statusService
+	this.service
 		.getCharacteristic(Characteristic.MainBrushLifeLevel)
 		.on('get', this.getMainBrushState.bind(this));
 
