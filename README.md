@@ -81,7 +81,9 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 11. In Mi Home app, get the Robot Vacuum IP address from General Settings > Network Info.
 
-12. Check the model name of the vacuum cleaner. If it is a 1st Generation, write `rockrobo.vacuum.v1`. If it's a 2nd Generation product, write `roborock.vacuum.s5`.
+12. Check the model name of the vacuum cleaner.\
+	If it is a 1st Generation, write `rockrobo.vacuum.v1`.\
+	If it's a 2nd Generation product, write `roborock.vacuum.s5`.
 
 12. Add these values to `config.json`.
 
@@ -94,14 +96,12 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 				"ip": "IP_ADDRESS_OF_THE_ROBOT",
 				"token": "TOKEN_DISCOVERED_FROM_STEP_7",
 				"showDock": false,
-				"showStatus": false,
 				"enablePause": false
 			}
 		]
 	```
 
-	​Set "showDock" to `true` or `false`  to display or hide docked state for the vacuum.
-	​Set "showStatus" to `true` or `false`  to display or hide sensors and filters status for the vacuum.
+	​Set "showDock" to `true` or `false`  to display or hide docked state for the vacuum.\
 	​Set "enablePause" to `true` or `false`  to display or hide pause button for the vacuum.
 
 13. Restart Homebridge, and your Mi Robot Vacuum will be added to Home app.

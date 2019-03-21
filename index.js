@@ -19,65 +19,63 @@ module.exports = function (homebridge) {
 function initCustomService() {
 	const baseProps = {
 		format: Characteristic.Formats.FLOAT,
-		unit: '%',
+		maxValue: 100,
+		minValue: 0,
 		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
 	};
 
-	let statusSensorsUUID = UUIDGen.generate('Sensors status');
-	Characteristic.StatusSensors = function () {
-		Characteristic.call(this, 'Sensors status', statusSensorsUUID);
+	/**
+	 * Characteristic "Side Brush Life Level"
+	 */
+	let sideBrushLifeLevelUUID = UUIDGen.generate('Side Brush Life Level');
+	Characteristic.SideBrushLifeLevel = function () {
+		Characteristic.call(this, 'Side Brush Life Level', sideBrushLifeLevelUUID);
 		
 		this.setProps(baseProps);
 
 		this.value = this.getDefaultValue();
 	};
-	inherits(Characteristic.StatusSensors, Characteristic);
-	Characteristic.StatusSensors.UUID = statusSensorsUUID;
+	inherits(Characteristic.SideBrushLifeLevel, Characteristic);
+	Characteristic.SideBrushLifeLevel.UUID = sideBrushLifeLevelUUID;
 
-	let statusFilterUUID = UUIDGen.generate('Filter status');
-	Characteristic.StatusFilter = function () {
-		Characteristic.call(this, 'Filter status', statusFilterUUID);
+	/**
+	 * Characteristic "Main Brush Life Level"
+	 */
+	let mainBrushLifeLevelUUID = UUIDGen.generate('Main Brush Life Level');
+	Characteristic.MainBrushLifeLevel = function () {
+		Characteristic.call(this, 'Main Brush Life Level', mainBrushLifeLevelUUID);
 		
 		this.setProps(baseProps);
 
 		this.value = this.getDefaultValue();
 	};
-	inherits(Characteristic.StatusFilter, Characteristic);
-	Characteristic.StatusFilter.UUID = statusFilterUUID;
+	inherits(Characteristic.MainBrushLifeLevel, Characteristic);
+	Characteristic.MainBrushLifeLevel.UUID = mainBrushLifeLevelUUID;
 
-	let statusSideBrushUUID = UUIDGen.generate('Side brush status');
-	Characteristic.StatusSideBrush = function () {
-		Characteristic.call(this, 'Side brush status', statusSideBrushUUID);
-		
-		this.setProps(baseProps);
+	/**
+	 * Service "Vacuum"
+	 */
+	let vacuumUUID = UUIDGen.generate('vacuum');
+	Service.Vacuum = function (displayName, subType) {
+		Service.call(this, displayName, vacuumUUID, subType);
 
-		this.value = this.getDefaultValue();
-	};
-	inherits(Characteristic.StatusSideBrush, Characteristic);
-	Characteristic.StatusSideBrush.UUID = statusSideBrushUUID;
+		// Required Characteristics
+		this.addCharacteristic(Characteristic.On);
+		this.addCharacteristic(Characteristic.BatteryLevel);
+		this.addCharacteristic(Characteristic.ChargingState);
+		this.addCharacteristic(Characteristic.StatusLowBattery);
 
-	let statusMainBrushUUID = UUIDGen.generate('Main brush status');
-	Characteristic.StatusMainBrush = function () {
-		Characteristic.call(this, 'Main brush status', statusMainBrushUUID);
-		
-		this.setProps(baseProps);
-
-		this.value = this.getDefaultValue();
-	};
-	inherits(Characteristic.StatusMainBrush, Characteristic);
-	Characteristic.StatusMainBrush.UUID = statusMainBrushUUID;
-
-	let statusUUID = UUIDGen.generate('Status Service');
-	Service.Status = function (displayName, subType) {
-		Service.call(this, displayName, statusUUID, subType);
-
-		this.addCharacteristic(Characteristic.StatusSensors);
-		this.addCharacteristic(Characteristic.StatusFilter);
-		this.addCharacteristic(Characteristic.StatusSideBrush);
-		this.addCharacteristic(Characteristic.StatusMainBrush);
+		// Optional Characteristics
+		this.addOptionalCharacteristic(Characteristic.RotationDirection);
+		this.addOptionalCharacteristic(Characteristic.RotationSpeed);
+		this.addOptionalCharacteristic(Characteristic.FilterLifeLevel);
+		this.addOptionalCharacteristic(Characteristic.SideBrushLifeLevel);
+		this.addOptionalCharacteristic(Characteristic.MainBrushLifeLevel);
+		this.addOptionalCharacteristic(Characteristic.Name);
 	}
-	inherits(Service.Status, Service);
-	Service.Status.UUID = statusUUID;
+
+	inherits(Service.Vacuum, Service);
+	Service.Vacuum.UUID = vacuumUUID;
 }
 
 function MiRobotVacuum(log, config) {
@@ -88,9 +86,8 @@ function MiRobotVacuum(log, config) {
 	this.ip = config.ip;
 	this.token = config.token;
 	this.model = config.model || 'roborock.vacuum.v1';
-	this.enablePause = config.enablePause || false;
 	this.showDock = config.showDock || false;
-	this.showStatus = config.showStatus || false;
+	this.enablePause = config.enablePause || false;
 	this.device = undefined;
 	this.cleaningState = undefined;
 	this.fanSpeed = undefined;
@@ -124,10 +121,10 @@ function MiRobotVacuum(log, config) {
 		]
 	};
 
-	// Vacuum cleaner is not available in Homekit yet, register as Fan
-	this.fanService = new Service.Fan(this.name);
-	this.batteryService = new Service.BatteryService(this.name + ' Battery');
+	initCustomService();
 
+	// Vacuum cleaner is not available in Homekit yet, register as Fan
+	this.service = new Service.Vacuum(this.name);
 	this.serviceInfo = new Service.AccessoryInformation();
 
 	this.serviceInfo
@@ -136,30 +133,41 @@ function MiRobotVacuum(log, config) {
 		.setCharacteristic(Characteristic.SerialNumber, this.token.toUpperCase())
 		.setCharacteristic(Characteristic.FirmwareRevision, version);
 
-	this.fanService
+	this.service
 		.getCharacteristic(Characteristic.On)
 		.on('get', this.getPowerState.bind(this))
 		.on('set', this.setPowerState.bind(this));
 
-	this.fanService
+	this.service
 		.getCharacteristic(Characteristic.RotationSpeed)
 		.on('get', this.getRotationSpeed.bind(this))
 		.on('set', this.setRotationSpeed.bind(this));
 
-	this.batteryService
+	this.service
 		.getCharacteristic(Characteristic.BatteryLevel)
 		.on('get', this.getBatteryLevel.bind(this));
 
-	this.batteryService
+	this.service
 		.getCharacteristic(Characteristic.ChargingState)
 		.on('get', this.getChargingState.bind(this));
 
-	this.batteryService
+	this.service
 		.getCharacteristic(Characteristic.StatusLowBattery)
 		.on('get', this.getStatusLowBattery.bind(this));
 
-	this.services.push(this.fanService);
-	this.services.push(this.batteryService);
+	this.statusService
+		.getCharacteristic(Characteristic.FilterLifeLevel)
+		.on('get', this.getFilterState.bind(this));
+
+	this.statusService
+		.getCharacteristic(Characteristic.SideBrushLifeLevel)
+		.on('get', this.getSideBrushState.bind(this));
+
+	this.statusService
+		.getCharacteristic(Characteristic.MainBrushLifeLevel)
+		.on('get', this.getMainBrushState.bind(this));
+
+	this.services.push(this.service);
 	this.services.push(this.serviceInfo);
 
 	if (this.enablePause) {
@@ -183,30 +191,6 @@ function MiRobotVacuum(log, config) {
 		this.services.push(this.dockService);
 	}
 
-	if (this.showStatus) {
-		initCustomService();
-
-		this.statusService = new Service.Status(this.name + ' Status');
-
-		this.statusService
-			.getCharacteristic(Characteristic.StatusSensors)
-			.on('get', this.getStatusSensors.bind(this));
-	
-		this.statusService
-			.getCharacteristic(Characteristic.StatusFilter)
-			.on('get', this.getStatusFilter.bind(this));
-	
-		this.statusService
-			.getCharacteristic(Characteristic.StatusSideBrush)
-			.on('get', this.getStatusSideBrush.bind(this));
-	
-		this.statusService
-			.getCharacteristic(Characteristic.StatusMainBrush)
-			.on('get', this.getStatusMainBrush.bind(this));
-
-		this.services.push(this.statusService);
-	}
-
 	this.discover();
 }
 
@@ -220,7 +204,7 @@ MiRobotVacuum.prototype = {
 			model: that.model
 		})
 		.then(device => {
-			if (device.matches('type:vaccuum')) {
+			if (device.matches('type:vacuum')) {
 				that.device = device;
 
 				logger.debug('Discovered Mi Robot Vacuum at %s', that.ip);
@@ -301,19 +285,19 @@ MiRobotVacuum.prototype = {
 			this.dockService.getCharacteristic(Characteristic.MotionDetected).updateValue(state);
 		}
 
-		this.batteryService.getCharacteristic(Characteristic.ChargingState).updateValue(state);
+		this.service.getCharacteristic(Characteristic.ChargingState).updateValue(state);
 	},
 
 	updateFanSpeed: function (speed) {
 		logger.debug('Fan Speed -> %s', speed);
 		this.fanSpeed = speed;
-		this.fanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(speed);
+		this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(speed);
 	},
 
 	updateBatteryLevel: function (level) {
 		logger.debug('Battery Level -> %s', level);
 		this.batteryLevel = level;
-		this.batteryService.getCharacteristic(Characteristic.BatteryLevel).updateValue(level);
+		this.service.getCharacteristic(Characteristic.BatteryLevel).updateValue(level);
 	},
 
 	getPowerState: function (callback) {
@@ -455,16 +439,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.chargingState) ? Characteristic.ChargingState.CHARGING : Characteristic.ChargingState.NOT_CHARGEABLE);
 	},
 
-	getStatusSensors: function (callback) {
-		if (!this.device) {
-			callback(new Error('No robot is discovered.'));
-			return;
-		}
-
-		callback(null, (this.device.property("sensorDirtyTime") / 108000 * 100));
-	},
-
-	getStatusFilter: function (callback) {
+	getFilterState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -473,7 +448,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property("filterWorkTime") / 540000 * 100));
 	},
 
-	getStatusSideBrush: function (callback) {
+	getSideBrushState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -482,7 +457,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property("sideBrushWorkTime") / 720000 * 100));
 	},
 
-	getStatusMainBrush: function (callback) {
+	getMainBrushState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
