@@ -25,34 +25,6 @@ function initCustomService() {
 	};
 
 	/**
-	 * Characteristic "Side Brush Life Level"
-	 */
-	let sideBrushLifeLevelUUID = '000000AG-0000-1000-8000-0026BB765291';
-	Characteristic.SideBrushLifeLevel = function () {
-		Characteristic.call(this, 'Side Brush Life Level', sideBrushLifeLevelUUID);
-		
-		this.setProps(baseProps);
-
-		this.value = this.getDefaultValue();
-	};
-	inherits(Characteristic.SideBrushLifeLevel, Characteristic);
-	Characteristic.SideBrushLifeLevel.UUID = sideBrushLifeLevelUUID;
-
-	/**
-	 * Characteristic "Main Brush Life Level"
-	 */
-	let mainBrushLifeLevelUUID = '000000AH-0000-1000-8000-0026BB765291';
-	Characteristic.MainBrushLifeLevel = function () {
-		Characteristic.call(this, 'Main Brush Life Level', mainBrushLifeLevelUUID);
-		
-		this.setProps(baseProps);
-
-		this.value = this.getDefaultValue();
-	};
-	inherits(Characteristic.MainBrushLifeLevel, Characteristic);
-	Characteristic.MainBrushLifeLevel.UUID = mainBrushLifeLevelUUID;
-
-	/**
 	 * Service "Vacuum"
 	 */
 	let vacuumUUID = '00000040-0000-1000-8000-0026BB765291';
@@ -158,14 +130,6 @@ function MiRobotVacuum(log, config) {
 	this.service
 		.getCharacteristic(Characteristic.FilterLifeLevel)
 		.on('get', this.getFilterState.bind(this));
-
-	this.service
-		.getCharacteristic(Characteristic.SideBrushLifeLevel)
-		.on('get', this.getSideBrushState.bind(this));
-
-	this.service
-		.getCharacteristic(Characteristic.MainBrushLifeLevel)
-		.on('get', this.getMainBrushState.bind(this));
 
 	this.services.push(this.service);
 	this.services.push(this.serviceInfo);
@@ -446,24 +410,6 @@ MiRobotVacuum.prototype = {
 		}
 
 		callback(null, (this.device.property("filterWorkTime") / 540000 * 100));
-	},
-
-	getSideBrushState: function (callback) {
-		if (!this.device) {
-			callback(new Error('No robot is discovered.'));
-			return;
-		}
-
-		callback(null, (this.device.property("sideBrushWorkTime") / 720000 * 100));
-	},
-
-	getMainBrushState: function (callback) {
-		if (!this.device) {
-			callback(new Error('No robot is discovered.'));
-			return;
-		}
-
-		callback(null, (this.device.property("mainBrushWorkTime") / 1080000 * 100));
 	},
 
 	identify: function (callback) {
