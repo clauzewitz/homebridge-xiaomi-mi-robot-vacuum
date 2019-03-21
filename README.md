@@ -87,22 +87,22 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 	```
 		"accessories": [
-		{
-			"accessory": "MiRobotVacuum",
-			"name": "Vacuum Cleaner",
-			"model": "MODEL_DISCOVERED_FROM_STEP_12",
-			"ip": "IP_ADDRESS_OF_THE_ROBOT",
-			"token": "TOKEN_DISCOVERED_FROM_STEP_7",
-			"pause": false,
-			"dock": false,
-			"status": false
-		}
+			{
+				"accessory": "MiRobotVacuum",
+				"name": "Vacuum Cleaner",
+				"model": "MODEL_DISCOVERED_FROM_STEP_12",
+				"ip": "IP_ADDRESS_OF_THE_ROBOT",
+				"token": "TOKEN_DISCOVERED_FROM_STEP_7",
+				"showDock": false,
+				"showStatus": false,
+				"enablePause": false
+			}
 		]
 	```
 
-	​Set "pause" to `true` or `false`  to display or hide pause button for the vacuum.
-	​Set "dock" to `true` or `false`  to display or hide docked state for the vacuum.
-	​Set "status" to `true` or `false`  to display or hide sensors and filters status for the vacuum.
+	​Set "showDock" to `true` or `false`  to display or hide docked state for the vacuum.
+	​Set "showStatus" to `true` or `false`  to display or hide sensors and filters status for the vacuum.
+	​Set "enablePause" to `true` or `false`  to display or hide pause button for the vacuum.
 
 13. Restart Homebridge, and your Mi Robot Vacuum will be added to Home app.
 

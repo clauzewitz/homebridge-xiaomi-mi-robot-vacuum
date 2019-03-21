@@ -88,9 +88,9 @@ function MiRobotVacuum(log, config) {
 	this.ip = config.ip;
 	this.token = config.token;
 	this.model = config.model || 'roborock.vacuum.v1';
-	this.pause = config.pause || false;
-	this.dock = config.dock || false;
-	this.status = config.status || false;
+	this.enablePause = config.enablePause || false;
+	this.showDock = config.showDock || false;
+	this.showStatus = config.showStatus || false;
 	this.device = undefined;
 	this.cleaningState = undefined;
 	this.fanSpeed = undefined;
@@ -162,7 +162,7 @@ function MiRobotVacuum(log, config) {
 	this.services.push(this.batteryService);
 	this.services.push(this.serviceInfo);
 
-	if (this.pause) {
+	if (this.enablePause) {
 		this.pauseService = new Service.Switch(this.name + ' Pause');
 
 		this.pauseService
@@ -173,7 +173,7 @@ function MiRobotVacuum(log, config) {
 		this.services.push(this.pauseService);
 	}
 
-	if (this.dock) {
+	if (this.showDock) {
 		this.dockService = new Service.MotionSensor(this.name + ' Dock');
 
 		this.dockService
@@ -183,7 +183,7 @@ function MiRobotVacuum(log, config) {
 		this.services.push(this.dockService);
 	}
 
-	if (this.status) {
+	if (this.showStatus) {
 		initCustomService();
 
 		this.statusService = new Service.Status(this.name + ' Status');
@@ -286,7 +286,7 @@ MiRobotVacuum.prototype = {
 		logger.debug('Cleaning State -> %s', state);
 		this.cleaningState = state;
 
-		if (this.dock) {
+		if (this.showDock) {
 			this.dockState = !state;
 			this.dockService.getCharacteristic(Characteristic.MotionDetected).updateValue(state);
 		}
@@ -296,7 +296,7 @@ MiRobotVacuum.prototype = {
 		logger.debug('Charging State -> %s', state);
 		this.chargingState = state;
 		
-		if (this.dock) {
+		if (this.showDock) {
 			this.dockState = state;
 			this.dockService.getCharacteristic(Characteristic.MotionDetected).updateValue(state);
 		}
