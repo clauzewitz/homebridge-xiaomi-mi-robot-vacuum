@@ -27,7 +27,7 @@ function initCustomService() {
 	/**
 	 * Characteristic "Side Brush Life Level"
 	 */
-	let sideBrushLifeLevelUUID = UUIDGen.generate('Side Brush Life Level');
+	let sideBrushLifeLevelUUID = '000000AG-0000-1000-8000-0026BB765291';
 	Characteristic.SideBrushLifeLevel = function () {
 		Characteristic.call(this, 'Side Brush Life Level', sideBrushLifeLevelUUID);
 		
@@ -41,7 +41,7 @@ function initCustomService() {
 	/**
 	 * Characteristic "Main Brush Life Level"
 	 */
-	let mainBrushLifeLevelUUID = UUIDGen.generate('Main Brush Life Level');
+	let mainBrushLifeLevelUUID = '000000AH-0000-1000-8000-0026BB765291';
 	Characteristic.MainBrushLifeLevel = function () {
 		Characteristic.call(this, 'Main Brush Life Level', mainBrushLifeLevelUUID);
 		
@@ -55,7 +55,7 @@ function initCustomService() {
 	/**
 	 * Service "Vacuum"
 	 */
-	let vacuumUUID = UUIDGen.generate('vacuum');
+	let vacuumUUID = '00000040-0000-1000-8000-0026BB765291';
 	Service.Vacuum = function (displayName, subType) {
 		Service.call(this, displayName, vacuumUUID, subType);
 
