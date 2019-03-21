@@ -3,9 +3,12 @@
 const miio = require('miio');
 const inherits = require('util').inherits;
 const version = require('./package.json').version;
-let Service, Characteristic, UUIDGen;
+let Service;
+let Characteristic;
+let UUIDGen;
+let logger;
 
-module.exports = function(homebridge) {
+module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
 	UUIDGen = homebridge.hap.uuid;
@@ -78,21 +81,22 @@ function initCustomService() {
 }
 
 function MiRobotVacuum(log, config) {
+	logger = log;
+
 	this.services = [];
-	this.log = log;
 	this.name = config.name || 'Vacuum Cleaner';
 	this.ip = config.ip;
 	this.token = config.token;
 	this.model = config.model || 'roborock.vacuum.v1';
-	this.pause = config.pause;
-	this.dock = config.dock;
-	this.status = config.status;
-	this.device = null;
-	this.cleaningState = null;
-	this.fanSpeed = null;
-	this.chargingState = null;
-	this.batteryLevel = null;
-	this.dockState = null;
+	this.pause = config.pause || false;
+	this.dock = config.dock || false;
+	this.status = config.status || false;
+	this.device = undefined;
+	this.cleaningState = undefined;
+	this.fanSpeed = undefined;
+	this.chargingState = undefined;
+	this.batteryLevel = undefined;
+	this.dockState = undefined;
 
 	if (!this.ip) {
 		throw new Error('Your must provide IP address of the robot vacuum.');
@@ -207,9 +211,8 @@ function MiRobotVacuum(log, config) {
 }
 
 MiRobotVacuum.prototype = {
-	discover: function() {
+	discover: function () {
 		const that = this;
-		let log = that.log;
 
 		miio.device({
 			address: that.ip,
@@ -220,19 +223,18 @@ MiRobotVacuum.prototype = {
 			if (device.matches('type:vaccuum')) {
 				that.device = device;
 
-				log.debug('Discovered Mi Robot Vacuum at %s', that.ip);
-
-				log.debug('Model         : ' + device.miioModel);
-				log.debug('State         : ' + device.property('state'));
-				log.debug('Fan Speed     : ' + device.property('fanSpeed'));
-				log.debug('Battery Level : ' + device.property('batteryLevel'));
+				logger.debug('Discovered Mi Robot Vacuum at %s', that.ip);
+				logger.debug('Model         : ' + device.miioModel);
+				logger.debug('State         : ' + device.property('state'));
+				logger.debug('Fan Speed     : ' + device.property('fanSpeed'));
+				logger.debug('Battery Level : ' + device.property('batteryLevel'));
 
 				device.state()
 					.then(state => {
 						state = JSON.parse(JSON.stringify(state));
 
 						if (state.error !== undefined) {
-							log.debug(state.error);
+							logger.debug(state.error);
 							return;
 						}
 
@@ -263,22 +265,25 @@ MiRobotVacuum.prototype = {
 							}
 						});
 					})
-					.catch(err => log.debug(err));
+					.catch(error => {
+						logger.debug(error);
+					});
 			} else {
-				log.debug('Device discovered at %s is not Mi Robot Vacuum', that.ip);
+				logger.debug('Device discovered at %s is not Mi Robot Vacuum', that.ip);
 			}
 		})
 		.catch(err => {
-			log.debug('Failed to discover Mi Robot Vacuum at %s', that.ip);
-			log.debug('Will retry after 30 seconds');
-			setTimeout(function() {
+			logger.debug('Failed to discover Mi Robot Vacuum at %s', that.ip);
+			logger.debug('Will retry after 30 seconds');
+
+			setTimeout(function () {
 				that.discover();
 			}, 30000);
 		});
 	},
 
-	updateCleaningState: function(state) {
-		this.log.debug('Cleaning State -> %s', state);
+	updateCleaningState: function (state) {
+		logger.debug('Cleaning State -> %s', state);
 		this.cleaningState = state;
 
 		if (this.dock) {
@@ -287,8 +292,8 @@ MiRobotVacuum.prototype = {
 		}
 	},
 
-	updateChargingState: function(state) {
-		this.log.debug('Charging State -> %s', state);
+	updateChargingState: function (state) {
+		logger.debug('Charging State -> %s', state);
 		this.chargingState = state;
 		
 		if (this.dock) {
@@ -299,19 +304,19 @@ MiRobotVacuum.prototype = {
 		this.batteryService.getCharacteristic(Characteristic.ChargingState).updateValue(state);
 	},
 
-	updateFanSpeed: function(speed) {
-		this.log.debug('Fan Speed -> %s', speed);
+	updateFanSpeed: function (speed) {
+		logger.debug('Fan Speed -> %s', speed);
 		this.fanSpeed = speed;
 		this.fanService.getCharacteristic(Characteristic.RotationSpeed).updateValue(speed);
 	},
 
-	updateBatteryLevel: function(level) {
-		this.log.debug('Battery Level -> %s', level);
+	updateBatteryLevel: function (level) {
+		logger.debug('Battery Level -> %s', level);
 		this.batteryLevel = level;
 		this.batteryService.getCharacteristic(Characteristic.BatteryLevel).updateValue(level);
 	},
 
-	getPowerState: function(callback) {
+	getPowerState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -320,7 +325,7 @@ MiRobotVacuum.prototype = {
 		callback(null, this.cleaningState);
 	},
 
-	setPowerState: function(state, callback) {
+	setPowerState: function (state, callback) {
 		const that = this;
 
 		if (!that.device) {
@@ -333,7 +338,7 @@ MiRobotVacuum.prototype = {
 		} else {
 			that.device.call('app_stop', []);
 
-			setTimeout(function() {
+			setTimeout(function () {
 				that.device.call('app_charge', [], {
 					refresh: [ 'state' ],
 					refreshDelay: 1000
@@ -344,7 +349,7 @@ MiRobotVacuum.prototype = {
 		callback();
 	},
 
-	getPauseState: function(callback) {
+	getPauseState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -353,7 +358,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property('state') == 'paused'));
 	},
 
-	setPauseState: function(state, callback) {
+	setPauseState: function (state, callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -361,7 +366,9 @@ MiRobotVacuum.prototype = {
 
 		if (state && this.device.property('state') == 'cleaning') {
 			this.device.pause()
-				.catch(err => this.log.debug(err));
+				.catch(error => {
+					logger.debug(error);
+				});
 			
 			callback(null, true);
 			return;
@@ -369,7 +376,9 @@ MiRobotVacuum.prototype = {
 		
 		if (!state && this.device.property('state') == 'paused') {
 			this.device.activateCleaning()
-				.catch(err => this.log.debug(err));
+				.catch(error => {
+					logger.debug(error);
+				});
 			
 			callback(null, false);
 			return;
@@ -378,7 +387,7 @@ MiRobotVacuum.prototype = {
 		callback();
 	},
 	
-	getDockState: function(callback) {
+	getDockState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -387,7 +396,7 @@ MiRobotVacuum.prototype = {
 		callback(null, this.dockState);
 	},
 
-	getRotationSpeed: function(callback) {
+	getRotationSpeed: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -396,7 +405,7 @@ MiRobotVacuum.prototype = {
 		callback(null, this.fanSpeed);
 	},
 
-	setRotationSpeed: function(speed, callback) {
+	setRotationSpeed: function (speed, callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -419,7 +428,7 @@ MiRobotVacuum.prototype = {
 		callback(null, speed);
 	},
 
-	getBatteryLevel: function(callback) {
+	getBatteryLevel: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -428,7 +437,7 @@ MiRobotVacuum.prototype = {
 		callback(null, this.batteryLevel);
 	},
 
-	getStatusLowBattery: function(callback) {
+	getStatusLowBattery: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -437,7 +446,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.batteryLevel < 30) ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);
 	},
 
-	getChargingState: function(callback) {
+	getChargingState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -446,7 +455,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.chargingState) ? Characteristic.ChargingState.CHARGING : Characteristic.ChargingState.NOT_CHARGEABLE);
 	},
 
-	getStatusSensors: function(callback) {
+	getStatusSensors: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -455,7 +464,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property("sensorDirtyTime") / 108000 * 100));
 	},
 
-	getStatusFilter: function(callback) {
+	getStatusFilter: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -464,7 +473,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property("filterWorkTime") / 540000 * 100));
 	},
 
-	getStatusSideBrush: function(callback) {
+	getStatusSideBrush: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -473,7 +482,7 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property("sideBrushWorkTime") / 720000 * 100));
 	},
 
-	getStatusMainBrush: function(callback) {
+	getStatusMainBrush: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
@@ -482,11 +491,11 @@ MiRobotVacuum.prototype = {
 		callback(null, (this.device.property("mainBrushWorkTime") / 1080000 * 100));
 	},
 
-	identify: function(callback) {
+	identify: function (callback) {
 		callback();
 	},
 
-	getServices: function() {
+	getServices: function () {
 		return this.services;
 	}
 };
