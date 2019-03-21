@@ -58,7 +58,7 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 6. Open command prompt or terminal. Run following command to discover the device:
 
 	```
-	miio --discover --sync
+	miio discover --sync
 	```
 
 	**Notes:** This will take about a minute or two.
