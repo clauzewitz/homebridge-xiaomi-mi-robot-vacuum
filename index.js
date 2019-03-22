@@ -5,25 +5,16 @@ const inherits = require('util').inherits;
 const version = require('./package.json').version;
 let Service;
 let Characteristic;
-let UUIDGen;
 let logger;
 
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
-	UUIDGen = homebridge.hap.uuid;
 
 	homebridge.registerAccessory('homebridge-xiaomi-robot-vacuum', 'MiRobotVacuum', MiRobotVacuum);
 }
 
 function initCustomService() {
-	const baseProps = {
-		format: Characteristic.Formats.FLOAT,
-		maxValue: 100,
-		minValue: 0,
-		perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-	};
-
 	/**
 	 * Service "Vacuum"
 	 */
