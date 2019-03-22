@@ -33,7 +33,7 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 * Display battery charging state.
 
-* Display sensors and filter state.
+* Display filter state.
 
 
 
