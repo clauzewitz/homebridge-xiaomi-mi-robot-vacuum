@@ -157,7 +157,14 @@ MiRobotVacuum.prototype = {
 			model: that.model
 		})
 		.then(device => {
-			if (device.matches('type:vacuum')) {
+			/*
+			MiioDevice {
+				model=roborock.vacuum.s5,
+				types=miio:vacuum, miio, vaccuum,
+				capabilities=adjustable-fan-speed, fan-speed, spot-cleaning, autonomous-cleaning, cleaning-state, error-state, charging-state, battery-level, state
+			}
+			*/
+			if (device.matches('type:vaccuum')) {
 				that.device = device;
 
 				logger.debug('Discovered Mi Robot Vacuum at %s', that.ip);
