@@ -16,7 +16,7 @@ module.exports = function (homebridge) {
 
 function initCustomService() {
 	/**
-	 * Service "Vacuum"
+	 * Service "Vacuum" Based on Service.Fan
 	 */
 	let vacuumUUID = '00000040-0000-1000-8000-0026BB765291';
 	Service.Vacuum = function (displayName, subType) {
@@ -32,8 +32,6 @@ function initCustomService() {
 		this.addOptionalCharacteristic(Characteristic.RotationDirection);
 		this.addOptionalCharacteristic(Characteristic.RotationSpeed);
 		this.addOptionalCharacteristic(Characteristic.FilterLifeLevel);
-		this.addOptionalCharacteristic(Characteristic.SideBrushLifeLevel);
-		this.addOptionalCharacteristic(Characteristic.MainBrushLifeLevel);
 		this.addOptionalCharacteristic(Characteristic.Name);
 	}
 
