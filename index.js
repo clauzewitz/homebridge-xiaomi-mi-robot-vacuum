@@ -405,7 +405,11 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		callback(null, (this.device.property("filterWorkTime") / 540000 * 100));
+		logger.log("filterWorkTime: " + this.device.property("filterWorkTime"));
+		logger.log("filterWorkTime Percentage: " + (this.device.property("filterWorkTime") / 540000 * 100));
+		logger.log("filterWorkTime Percentage(decent): " + (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
+
+		callback(null, (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
 	},
 
 	identify: function (callback) {
