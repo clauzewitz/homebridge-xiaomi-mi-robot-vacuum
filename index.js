@@ -172,6 +172,10 @@ MiRobotVacuum.prototype = {
 				logger.debug('State         : ' + device.property('state'));
 				logger.debug('Fan Speed     : ' + device.property('fanSpeed'));
 				logger.debug('Battery Level : ' + device.property('batteryLevel'));
+				logger.debug('mainBrush Work Time : ' + device.property('mainBrushWorkTime'));
+				logger.debug('sideBrush Work Time : ' + device.property('sideBrushWorkTime'));
+				logger.debug('filter Work Time : ' + device.property('filterWorkTime'));
+				logger.debug('sensor Dirty Time : ' + device.property('sensorDirtyTime'));
 
 				device.state()
 					.then(state => {
