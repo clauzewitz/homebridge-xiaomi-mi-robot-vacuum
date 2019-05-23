@@ -409,9 +409,9 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		logger.log("filterWorkTime: " + this.device.property("filterWorkTime"));
-		logger.log("filterWorkTime Percentage: " + (this.device.property("filterWorkTime") / 540000 * 100));
-		logger.log("filterWorkTime Percentage(decent): " + (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
+		console.log("filterWorkTime: " + this.device.property("filterWorkTime"));
+		console.log("filterWorkTime Percentage: " + (this.device.property("filterWorkTime") / 540000 * 100));
+		console.log("filterWorkTime Percentage(decent): " + (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
 
 		callback(null, (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
 	},
