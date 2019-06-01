@@ -118,7 +118,7 @@ function MiRobotVacuum(log, config) {
 
 	this.service
 		.getCharacteristic(Characteristic.FilterLifeLevel)
-		.on('get', this.getFilterState.bind(this));
+		.on('get', this.getMainBrushState.bind(this));
 
 	this.services.push(this.service);
 	this.services.push(this.serviceInfo);
@@ -409,11 +409,34 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		console.log("filterWorkTime: " + this.device.property("filterWorkTime"));
-		console.log("filterWorkTime Percentage: " + (this.device.property("filterWorkTime") / 540000 * 100));
-		console.log("filterWorkTime Percentage(decent): " + (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
-
 		callback(null, (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
+	},
+
+	getMainBrushState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("mainBrushWorkTime") / 1080000 * 100)));
+	},
+
+	getSideBrushState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("sideBrushWorkTime") / 720000 * 100)));
+	},
+
+	getSensorState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("sensorDirtyTime") / 108000 * 100)));
 	},
 
 	identify: function (callback) {
