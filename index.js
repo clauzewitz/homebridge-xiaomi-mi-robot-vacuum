@@ -32,6 +32,7 @@ function initCustomService() {
 		this.addOptionalCharacteristic(Characteristic.RotationDirection);
 		this.addOptionalCharacteristic(Characteristic.RotationSpeed);
 		this.addOptionalCharacteristic(Characteristic.FilterLifeLevel);
+		this.addOptionalCharacteristic(Characteristic.FilterChangeIndication);
 		this.addOptionalCharacteristic(Characteristic.Name);
 	}
 
@@ -119,6 +120,10 @@ function MiRobotVacuum(log, config) {
 	this.service
 		.getCharacteristic(Characteristic.FilterLifeLevel)
 		.on('get', this.getMainBrushState.bind(this));
+
+	this.service
+		.getCharacteristic(Characteristic.FilterChangeIndication)
+		.on('get', this.getMainBrushChangeState.bind(this));
 
 	this.services.push(this.service);
 	this.services.push(this.serviceInfo);
@@ -413,6 +418,15 @@ MiRobotVacuum.prototype = {
 	},
 
 	getMainBrushState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("mainBrushWorkTime") / 1080000 * 100)));
+	},
+
+	getMainBrushChangeState: function (callback) {
 		if (!this.device) {
 			callback(new Error('No robot is discovered.'));
 			return;
