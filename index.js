@@ -432,7 +432,7 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		callback(null, (100 - (this.device.property("mainBrushWorkTime") / 1080000 * 100)));
+		callback(null, ((100 - (this.device.property("mainBrushWorkTime") / 1080000 * 100)) < 5) ? Characteristic.FilterChangeIndication.CHANGE_FILTER : Characteristic.FilterChangeIndication.FILTER_OK);
 	},
 
 	getSideBrushState: function (callback) {
