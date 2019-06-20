@@ -17,17 +17,23 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 * Control suction power by adjust the fan speed.
 	+ Xiaomi Mi Robot 1st Generation (Roborock Vacuum V1)
-		- Quiet (1 -38%)
+		- Quiet (1 - 38%)
 		- Balance (39 - 60%)
 		- Turbo (61 - 77%)
 		- Max Speed (> 77%)
 
 	+ Xiaomi Roborock S50 2nd Generation (Roborock Vacuum S5)
-		- Mopping (1 -15%)
-		- Quiet (16 -38%)
+		- Mopping (1 - 15%)
+		- Quiet (16 - 38%)
 		- Balance (39 - 60%)
 		- Turbo (61 - 75%)
 		- Max Speed (> 76%)
+
+	+ Xiaomi Roborock S60 2nd Generation (Roborock Vacuum S6)
+		- Quiet (1 - 38%)
+		- Balance (39 - 60%)
+		- Turbo (61 - 77%)
+		- Max Speed (> 77%)
 
 * Display battery level, and notify on low battery.
 
@@ -82,8 +88,9 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 11. In Mi Home app, get the Robot Vacuum IP address from General Settings > Network Info.
 
 12. Check the model name of the vacuum cleaner.\
-	If it is a 1st Generation, write `rockrobo.vacuum.v1`.\
-	If it's a 2nd Generation product, write `roborock.vacuum.s5`.
+	If it's a 1st Generation product, write `rockrobo.vacuum.v1` or `rockrobo.vacuum.c1`\
+	If it's a 2nd Generation product, write `roborock.vacuum.s5`\
+	If it's a 3nd Generation product, write `roborock.vacuum.s6`.
 
 12. Add these values to `config.json`.
 

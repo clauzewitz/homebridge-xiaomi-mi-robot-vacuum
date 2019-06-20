@@ -65,20 +65,34 @@ function MiRobotVacuum(log, config) {
 		throw new Error('Your must provide token of the robot vacuum.');
 	}
 
+	this.genTypes = {
+		'rockrobo.vacuum.v1': 'gen1',
+		'rockrobo.vacuum.c1': 'gen1',
+		'rockrobo.vacuum.s5': 'gen2',
+		'rockrobo.vacuum.s6': 'gen3'
+	};
+
 	this.speedGroup = {
-		v1: [
+		gen1: [
 			0,	// Idle
 			38,	// Quiet
 			60,	// Balanced
 			77,	// Turbo
 			90	// Max Speed
 		],
-		s5: [
+		gen2: [
 			0,	// Idle
 			15, // Mopping
 			38,	// Quiet
 			60,	// Balanced
 			75,	// Turbo
+			100	// Max Speed
+		],
+		gen3: [
+			0,	// Idle
+			38,	// Quiet
+			60,	// Balanced
+			77,	// Turbo
 			100	// Max Speed
 		]
 	};
@@ -364,11 +378,8 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		let speeds = this.speedGroup['v1'];
-
-		if (this.model == 'roborock.vacuum.s5') {
-			speeds = this.speedGroup['s5'];
-		}
+		let genType = this.genTypes[this.model];
+		let speeds = this.speedGroup[genType];
 
 		for (var item in speeds) {
 			if (speed <= item) {
