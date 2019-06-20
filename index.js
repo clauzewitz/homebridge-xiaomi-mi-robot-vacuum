@@ -74,26 +74,74 @@ function MiRobotVacuum(log, config) {
 
 	this.speedGroup = {
 		gen1: [
-			0,	// Idle
-			38,	// Quiet
-			60,	// Balanced
-			77,	// Turbo
-			90	// Max Speed
+			{	// Idle
+				homekitValue: 0,
+				miValue: 0
+			},
+			{	// Quiet
+				homekitValue: 38,
+				miValue: 38
+			},
+			{	// Balanced
+				homekitValue: 60,
+				miValue: 60
+			},
+			{	// Turbo
+				homekitValue: 77,
+				miValue: 77
+			},
+			{	// Max Speed
+				homekitValue: 100,
+				miValue: 90
+			}
 		],
 		gen2: [
-			0,	// Idle
-			15, // Mopping
-			38,	// Quiet
-			60,	// Balanced
-			75,	// Turbo
-			100	// Max Speed
+			{	// Idle
+				homekitValue: 0,
+				miValue: 0
+			},
+			{	// Mopping
+				homekitValue: 15,
+				miValue: 105
+			},
+			{	// Quiet
+				homekitValue: 38,
+				miValue: 38
+			},
+			{	// Balanced
+				homekitValue: 60,
+				miValue: 60
+			},
+			{	// Turbo
+				homekitValue: 75,
+				miValue: 75
+			},
+			{	// Max Speed
+				homekitValue: 100,
+				miValue: 100
+			}
 		],
 		gen3: [
-			0,	// Idle
-			38,	// Quiet
-			60,	// Balanced
-			77,	// Turbo
-			100	// Max Speed
+			{	// Idle
+				homekitValue: 0,
+				miValue: 0
+			},
+			{	// Quiet
+				homekitValue: 38,
+				miValue: 101
+			},
+			{	// Balanced
+				homekitValue: 60,
+				miValue: 102
+			},
+			{	// Turbo
+				homekitValue: 77,
+				miValue: 103
+			},
+			{	// Max Speed
+				homekitValue: 100,
+				miValue: 104
+			}
 		]
 	};
 
@@ -369,7 +417,18 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		callback(null, this.fanSpeed);
+		let genType = this.genTypes[this.model];
+		let speeds = this.speedGroup[genType];
+		let speed = this.fanSpeed;
+
+		for (var item in speeds) {
+			if (item.miValue == speed) {
+				speed = item.homekitValue;
+				break;
+			}
+		}
+
+		callback(null, speed);
 	},
 
 	setRotationSpeed: function (speed, callback) {
@@ -380,15 +439,16 @@ MiRobotVacuum.prototype = {
 
 		let genType = this.genTypes[this.model];
 		let speeds = this.speedGroup[genType];
+		let fanSpeed = speed;
 
 		for (var item in speeds) {
-			if (speed <= item) {
-				speed = item;
+			if (item.homekitValue >= speed) {
+				fanSpeed = item.miValue;
 				break;
 			}
 		}
 
-		this.device.changeFanSpeed(Number(speed));
+		this.device.changeFanSpeed(Number(fanSpeed));
 		callback(null, speed);
 	},
 
