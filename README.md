@@ -1,7 +1,6 @@
 [![npm version](https://badge.fury.io/js/homebridge-xiaomi-robot-vacuum.svg)](https://badge.fury.io/js/homebridge-xiaomi-robot-vacuum)
 
 # homebridge-xiaomi-robot-vacuum
-
 This project is forked from [homebridge-xiaomi-mi-robot-vacuum](https://github.com/seikan/homebridge-xiaomi-mi-robot-vacuum).
 
 This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarina/homebridge). Since Apple Homekit is not supporting vacuum cleaner device yet, this plugin will add the robot as **Fan** to your Home app.
@@ -12,7 +11,6 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 
 ### Features
-
 * Switch on / off. When off, it will returning to charging dock automatically.
 
 * Control suction power by adjust the fan speed.
@@ -38,7 +36,6 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 
 ### Installation
-
 1. Install required packages.
 
 	```
@@ -108,6 +105,5 @@ This is Xiaomi Mi Robot Vacuum plugin for [Homebridge](https://github.com/nfarin
 
 
 
-### License
-
-See the [LICENSE](https://github.com/seikan/homebridge-xiaomi-mi-robot-vacuum/blob/master/LICENSE.md) file for license rights and limitations (MIT).
+# License
+MIT License
