@@ -32,6 +32,7 @@ function initCustomService() {
 		this.addOptionalCharacteristic(Characteristic.RotationDirection);
 		this.addOptionalCharacteristic(Characteristic.RotationSpeed);
 		this.addOptionalCharacteristic(Characteristic.FilterLifeLevel);
+		this.addOptionalCharacteristic(Characteristic.FilterChangeIndication);
 		this.addOptionalCharacteristic(Characteristic.Name);
 	}
 
@@ -64,21 +65,83 @@ function MiRobotVacuum(log, config) {
 		throw new Error('Your must provide token of the robot vacuum.');
 	}
 
+	this.genTypes = {
+		'rockrobo.vacuum.v1': 'gen1',
+		'rockrobo.vacuum.c1': 'gen1',
+		'rockrobo.vacuum.s5': 'gen2',
+		'rockrobo.vacuum.s6': 'gen3'
+	};
+
 	this.speedGroup = {
-		v1: [
-			0,	// Idle
-			38,	// Quiet
-			60,	// Balanced
-			77,	// Turbo
-			90	// Max Speed
+		gen1: [
+			{	// Idle
+				homekitValue: 0,
+				miValue: 0
+			},
+			{	// Quiet
+				homekitValue: 38,
+				miValue: 38
+			},
+			{	// Balanced
+				homekitValue: 60,
+				miValue: 60
+			},
+			{	// Turbo
+				homekitValue: 77,
+				miValue: 77
+			},
+			{	// Max Speed
+				homekitValue: 100,
+				miValue: 90
+			}
 		],
-		s5: [
-			0,	// Idle
-			15, // Mopping
-			38,	// Quiet
-			60,	// Balanced
-			75,	// Turbo
-			100	// Max Speed
+		gen2: [
+			{	// Idle
+				homekitValue: 0,
+				miValue: 0
+			},
+			{	// Mopping
+				homekitValue: 15,
+				miValue: 105
+			},
+			{	// Quiet
+				homekitValue: 38,
+				miValue: 38
+			},
+			{	// Balanced
+				homekitValue: 60,
+				miValue: 60
+			},
+			{	// Turbo
+				homekitValue: 75,
+				miValue: 75
+			},
+			{	// Max Speed
+				homekitValue: 100,
+				miValue: 100
+			}
+		],
+		gen3: [
+			{	// Idle
+				homekitValue: 0,
+				miValue: 0
+			},
+			{	// Quiet
+				homekitValue: 38,
+				miValue: 101
+			},
+			{	// Balanced
+				homekitValue: 60,
+				miValue: 102
+			},
+			{	// Turbo
+				homekitValue: 77,
+				miValue: 103
+			},
+			{	// Max Speed
+				homekitValue: 100,
+				miValue: 104
+			}
 		]
 	};
 
@@ -118,7 +181,11 @@ function MiRobotVacuum(log, config) {
 
 	this.service
 		.getCharacteristic(Characteristic.FilterLifeLevel)
-		.on('get', this.getFilterState.bind(this));
+		.on('get', this.getMainBrushState.bind(this));
+
+	this.service
+		.getCharacteristic(Characteristic.FilterChangeIndication)
+		.on('get', this.getMainBrushChangeState.bind(this));
 
 	this.services.push(this.service);
 	this.services.push(this.serviceInfo);
@@ -350,7 +417,18 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		callback(null, this.fanSpeed);
+		let genType = this.genTypes[this.model];
+		let speeds = this.speedGroup[genType];
+		let speed = this.fanSpeed;
+
+		for (var item in speeds) {
+			if (item.miValue == speed) {
+				speed = item.homekitValue;
+				break;
+			}
+		}
+
+		callback(null, speed);
 	},
 
 	setRotationSpeed: function (speed, callback) {
@@ -359,20 +437,18 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		let speeds = this.speedGroup['v1'];
-
-		if (this.model == 'roborock.vacuum.s5') {
-			speeds = this.speedGroup['s5'];
-		}
+		let genType = this.genTypes[this.model];
+		let speeds = this.speedGroup[genType];
+		let fanSpeed = speed;
 
 		for (var item in speeds) {
-			if (speed <= item) {
-				speed = item;
+			if (item.homekitValue >= speed) {
+				fanSpeed = item.miValue;
 				break;
 			}
 		}
 
-		this.device.changeFanSpeed(Number(speed));
+		this.device.changeFanSpeed(Number(fanSpeed));
 		callback(null, speed);
 	},
 
@@ -409,11 +485,43 @@ MiRobotVacuum.prototype = {
 			return;
 		}
 
-		console.log("filterWorkTime: " + this.device.property("filterWorkTime"));
-		console.log("filterWorkTime Percentage: " + (this.device.property("filterWorkTime") / 540000 * 100));
-		console.log("filterWorkTime Percentage(decent): " + (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
-
 		callback(null, (100 - (this.device.property("filterWorkTime") / 540000 * 100)));
+	},
+
+	getMainBrushState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("mainBrushWorkTime") / 1080000 * 100)));
+	},
+
+	getMainBrushChangeState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, ((100 - (this.device.property("mainBrushWorkTime") / 1080000 * 100)) < 5) ? Characteristic.FilterChangeIndication.CHANGE_FILTER : Characteristic.FilterChangeIndication.FILTER_OK);
+	},
+
+	getSideBrushState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("sideBrushWorkTime") / 720000 * 100)));
+	},
+
+	getSensorState: function (callback) {
+		if (!this.device) {
+			callback(new Error('No robot is discovered.'));
+			return;
+		}
+
+		callback(null, (100 - (this.device.property("sensorDirtyTime") / 108000 * 100)));
 	},
 
 	identify: function (callback) {
